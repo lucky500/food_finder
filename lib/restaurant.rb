@@ -1,10 +1,13 @@
+require 'support/number_helper'
 class Restaurant
+  include NumberHelper
+
   @@filepath = nil
   def self.filepath=(path=nil)
     @@filepath = File.join(APP_ROOT, path)
   end
 
-attr_accessor :name, :cuisine, :price
+  attr_accessor :name, :cuisine, :price
 
   def self.file_exists?
     # class should know if the restaurant file exists
@@ -30,8 +33,9 @@ attr_accessor :name, :cuisine, :price
   end
 
   def self.saved_restaurants
-    # read the restaurant file
-    restaurants  = []
+    # We have to ask ourselves, do we want a fresh copy each
+    # time or do we want to store the results in a variable?
+    restaurants = []
     if file_usable?
       file = File.new(@@filepath, 'r')
       file.each_line do |line|
@@ -47,7 +51,7 @@ attr_accessor :name, :cuisine, :price
     print "Restaurant name: "
     args[:name] = gets.chomp.strip
 
-    print "Cuisine Type: "
+    print "Cuisine type: "
     args[:cuisine] = gets.chomp.strip
 
     print "Average price: "
@@ -57,9 +61,9 @@ attr_accessor :name, :cuisine, :price
   end
 
   def initialize(args={})
-    @name = args[:name] || ""
+    @name    = args[:name]    || ""
     @cuisine = args[:cuisine] || ""
-    @price  = args[:price] || ""
+    @price   = args[:price]   || ""
   end
 
   def import_line(line)
@@ -71,9 +75,13 @@ attr_accessor :name, :cuisine, :price
   def save
     return false unless Restaurant.file_usable?
     File.open(@@filepath, 'a') do |file|
-      file.puts "#{[@name, @cuisine, @price].join("\t")}"
+      file.puts "#{[@name, @cuisine, @price].join("\t")}\n"
     end
     return true
+  end
+
+  def formatted_price
+    number_to_currency(@price)
   end
 
 end
